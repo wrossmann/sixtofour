@@ -1,0 +1,16 @@
+{
+    "name": "wrossmann/sixtofour",
+    "description": "Library for conversion of IPv4 addresses to 6to4-encapsulated IPv6.",
+    "authors": [
+        {
+            "name": "Wade Rossmann",
+            "email": "wrossmann@gmail.com"
+        }
+    ],
+    "autoload": {
+    	"psr-4": {
+    		"wrossmann\\sixtofour\\": "src/"
+    	}
+    },
+    "require": {}
+}
