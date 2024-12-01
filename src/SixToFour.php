@@ -7,6 +7,21 @@ namespace wrossmann\sixtofour;
  * Static functions to handle conversion of IPv4 addresses to 6to4-encapsulated IPv6.
  */
 class SixToFour {
+
+	private static $prefix = '2002';
+
+	/**
+	 * Set a custom prefix
+	 * 
+	 * @param	string	$prefix
+	 */
+	public static function setPrefix($prefix) {
+		if( strlen($prefix) > 4 || hex2bin($prefix) === false ) {
+			throw new \Exception('Invalid prefix specified.');
+		}
+		self::$prefix = $prefix;
+	}
+
 	/**
 	 * Check if a string is an IPv6 address
 	 * 
@@ -35,7 +50,28 @@ class SixToFour {
 	 */
 	public static function isSixToFour($addr) {
 		if( ! self::isSix($addr)) { return false; }
-		return explode(':', $addr)[0] == '2002';
+		if( strlen(self::getSixToFourHextets($addr)) > 8 ) { return false; }
+		return explode(':', $addr)[0] == self::$prefix;
+	}
+
+	/**
+	 * Get concatenated hextexts 2-5 of a given IPv6 string
+	 *
+	 * @param	string	$addr
+	 * @return	string
+	 */
+	protected static function getSixToFourHextets($addr) {
+		// the double hexdec will reduce '0001' to '1'
+		return implode(
+			'',
+			array_map(
+				function($a){return str_pad(dechex(hexdec($a)), 2, '0', STR_PAD_LEFT);},
+				array_slice(
+					explode(':', $addr),
+					1, 4
+				)
+			)
+		);
 	}
 	
 	/**
@@ -46,7 +82,7 @@ class SixToFour {
 	 */
 	public static function convFourToSix($addr) {
 		if( ! self::isFour($addr) ) { return false; }
-		return sprintf('2002:%s::',	implode(':', str_split(str_pad(dechex(ip2long($addr)), 8, '0', STR_PAD_LEFT), 2)));
+		return sprintf('%s:%s::', self::$prefix, implode(':', str_split(str_pad(dechex(ip2long($addr)), 8, '0', STR_PAD_LEFT), 2)));
 	}
 	
 	/**
@@ -56,8 +92,8 @@ class SixToFour {
 	 * @return	string|boolean
 	 */
 	public static function convSixToFour($addr) {
-		if( ! self::isSix($addr) ) { return false; }
-		return long2ip(hexdec(implode('', array_map(function($a){return str_pad($a, 2, '0', STR_PAD_LEFT);}, array_slice(explode(':', $addr), 1, 4)))));
+		if( ! self::isSixToFour($addr) ) { return false; }
+		return long2ip(hexdec(self::getSixtoFourHextets($addr)));
 	}
 	
 	/**

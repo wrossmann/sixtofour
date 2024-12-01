@@ -9,5 +9,7 @@ var_dump(
 	bin2hex($bin),
 	SixToFour::bin2str($bin),
 	SixToFour::bin2str($bin, true),
-	SixToFour::convSixToFour($v6)
+	SixToFour::convSixToFour($v6),
+	SixToFour::convSixToFour('2002:0001:0002:0003:0004::'),
+	SixToFour::convSixToFour('2002:1001:2002:3003:4004::')
 );
